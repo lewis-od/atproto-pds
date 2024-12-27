@@ -5,6 +5,13 @@ resource "digitalocean_droplet" "pds" {
   image    = "ubuntu-22-04-x64"
   size     = "s-1vcpu-1gb"
   ssh_keys = [var.digitalocean_ssh_key_id]
+  backups  = true
+
+  backup_policy {
+    plan    = "weekly"
+    weekday = "SUN"
+    hour    = 0
+  }
 }
 
 resource "digitalocean_reserved_ip" "pds" {

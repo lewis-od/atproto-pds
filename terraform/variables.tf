@@ -19,16 +19,16 @@ variable "digitalocean_ssh_key_id" {
 }
 
 variable "resend_mx_record" {
-  type = string
+  type        = string
   description = "MX record from Resend"
 }
 
 variable "resend_txt_record" {
-  type = string
+  type        = string
   description = "Resend TXT record for 'send.' subdomain"
 }
 
 variable "resend_domainkey" {
-  type = string
+  type        = string
   description = "Resend domain key record"
 }
