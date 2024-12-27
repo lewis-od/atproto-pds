@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-ssh -t root@pds.lewis-od.co.uk 'sudo pdsadmin update'
+set -eu
+
+. "$(dirname $0)/.env"
+
+ssh -t "root@pds.$ROOT_DOMAIN" 'sudo pdsadmin update'

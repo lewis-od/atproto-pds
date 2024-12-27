@@ -4,4 +4,4 @@ set -eu
 
 . "$(dirname $0)/.env"
 
-ssh "root@pds.$ROOT_DOMAIN"
+ssh -t "root@pds.$ROOT_DOMAIN" "sudo pdsadmin $@"
