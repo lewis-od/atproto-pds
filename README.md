@@ -14,7 +14,7 @@ Terraform for hosting an [AT Proto PDS] using:
 
 1. Ensure you have a Hosted Zone setup in Route 53 for the domain you wish to use
 2. Create the domain `pds.<your root domain>` in Resend
-3. Create a project in Digital Ocean and create an API Key
+3. Create a project in DigitalOcean and create an API Key
 4. Add an SSH key to your Digital Ocean account
 5. Find the ID of the SSH key you added by running
     ```shell
