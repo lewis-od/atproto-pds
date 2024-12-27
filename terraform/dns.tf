@@ -1,5 +1,5 @@
 data "aws_route53_zone" "zone" {
-  name = "lewis-od.co.uk"
+  name = var.hosted_zone_name
 }
 
 resource "aws_route53_record" "pds" {

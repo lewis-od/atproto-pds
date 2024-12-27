@@ -13,22 +13,27 @@ variable "aws_secret_access_key" {
   description = "AWS secret access key"
 }
 
+variable "hosted_zone_name" {
+  type        = string
+  description = "Hosted zone name to use for Route 53 records. PDS will be hosted at pds.{hosted_zone_name}"
+}
+
 variable "digitalocean_ssh_key_id" {
   type        = number
-  description = "ID of the Digital Ocean SSH key to be added to the Droplet"
+  description = "ID of the Digital Ocean SSH key to be added to the Droplet. Can be retrieved from https://api.digitalocean.com/v2/account/keys"
 }
 
 variable "resend_mx_record" {
   type        = string
-  description = "MX record from Resend"
+  description = "MX record from Resend for 'send.' subdomain"
 }
 
 variable "resend_txt_record" {
   type        = string
-  description = "Resend TXT record for 'send.' subdomain"
+  description = "TXT record value from Resend for 'send.' subdomain"
 }
 
 variable "resend_domainkey" {
   type        = string
-  description = "Resend domain key record"
+  description = "TXT record value from Resend for 'resend._domainkey.' subdomain"
 }
