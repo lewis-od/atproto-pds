@@ -18,6 +18,12 @@ variable "hosted_zone_name" {
   description = "Hosted zone name to use for Route 53 records. PDS will be hosted at pds.{hosted_zone_name}"
 }
 
+variable "droplet_region" {
+  type = string
+  description = "Region to deploy the PDS Droplet in"
+  default = "lon1"
+}
+
 variable "digitalocean_ssh_key_id" {
   type        = number
   description = "ID of the Digital Ocean SSH key to be added to the Droplet. Can be retrieved from https://api.digitalocean.com/v2/account/keys"

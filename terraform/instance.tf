@@ -2,7 +2,7 @@ module "pds_droplet" {
   source = "./modules/droplet"
 
   name        = "atproto-pds"
-  region      = "lon1"
+  region      = var.droplet_region
   ssh_key_ids = [var.digitalocean_ssh_key_id]
   firewall_rules_inbound = [
     {
