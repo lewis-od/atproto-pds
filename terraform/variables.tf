@@ -19,9 +19,9 @@ variable "hosted_zone_name" {
 }
 
 variable "droplet_region" {
-  type = string
+  type        = string
   description = "Region to deploy the PDS Droplet in"
-  default = "lon1"
+  default     = "lon1"
 }
 
 variable "digitalocean_ssh_key_id" {

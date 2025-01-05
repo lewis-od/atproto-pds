@@ -2,26 +2,26 @@ data "aws_route53_zone" "zone" {
   name = var.hosted_zone_name
 }
 
-resource "aws_route53_record" "pds" {
-  name    = "pds.${data.aws_route53_zone.zone.name}"
-  zone_id = data.aws_route53_zone.zone.zone_id
+module "pds_dns" {
+  source = "./modules/dns-pds-aws"
 
-  type    = "A"
-  ttl     = "300"
-  records = [module.pds_droplet.ip_address]
+  hosted_zone_id   = data.aws_route53_zone.zone.id
+  hosted_zone_name = data.aws_route53_zone.zone.name
+  pds_ip_address   = module.pds_droplet.ip_address
 }
 
-resource "aws_route53_record" "pds_star" {
-  name    = "*.${aws_route53_record.pds.fqdn}"
-  zone_id = data.aws_route53_zone.zone.zone_id
+moved {
+  from = aws_route53_record.pds
+  to   = module.pds_dns.aws_route53_record.pds
+}
 
-  type    = "A"
-  ttl     = "300"
-  records = [module.pds_droplet.ip_address]
+moved {
+  from = aws_route53_record.pds_star
+  to   = module.pds_dns.aws_route53_record.pds_star
 }
 
 resource "aws_route53_record" "resend_mx" {
-  name    = "send.${aws_route53_record.pds.fqdn}"
+  name    = "send.${module.pds_dns.pds_fqdn}"
   zone_id = data.aws_route53_zone.zone.zone_id
 
   type    = "MX"
@@ -30,7 +30,7 @@ resource "aws_route53_record" "resend_mx" {
 }
 
 resource "aws_route53_record" "resend_txt" {
-  name    = "send.${aws_route53_record.pds.fqdn}"
+  name    = "send.${module.pds_dns.pds_fqdn}"
   zone_id = data.aws_route53_zone.zone.zone_id
 
   type    = "TXT"
@@ -39,7 +39,7 @@ resource "aws_route53_record" "resend_txt" {
 }
 
 resource "aws_route53_record" "resend_domainkey" {
-  name    = "resend._domainkey.${aws_route53_record.pds.fqdn}"
+  name    = "resend._domainkey.${module.pds_dns.pds_fqdn}"
   zone_id = data.aws_route53_zone.zone.zone_id
 
   type    = "TXT"
