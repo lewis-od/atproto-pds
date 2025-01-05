@@ -8,7 +8,7 @@ resource "aws_route53_record" "pds" {
 
   type    = "A"
   ttl     = "300"
-  records = [digitalocean_reserved_ip.pds.ip_address]
+  records = [module.pds_droplet.ip_address]
 }
 
 resource "aws_route53_record" "pds_star" {
@@ -17,7 +17,7 @@ resource "aws_route53_record" "pds_star" {
 
   type    = "A"
   ttl     = "300"
-  records = [digitalocean_reserved_ip.pds.ip_address]
+  records = [module.pds_droplet.ip_address]
 }
 
 resource "aws_route53_record" "resend_mx" {
