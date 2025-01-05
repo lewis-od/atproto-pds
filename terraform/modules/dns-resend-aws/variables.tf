@@ -30,15 +30,7 @@ variable "domainkey" {
 }
 
 variable "dmarc" {
-  type = object({
-    percentage             = optional(number)           # pct
-    forensic_report_email  = optional(string)           # ruf
-    aggregate_report_email = optional(string)           # rua
-    policy                 = string                     # p
-    subdomain_policy       = optional(string)           # sp
-    dkim_alignment_mode    = optional(string)           # adkim
-    spf_alignment_mode     = optional(string)           # aspf
-  })
-  description = "DMARC record to create, see https://en.wikipedia.org/wiki/DMARC for more info"
-  default     = { policy = "none" }
+  type        = string
+  description = "Value of the DMARC record to create"
+  default     = "v=DMARC1;p=none;"
 }

@@ -47,6 +47,13 @@ module "pds_dns" {
   pds_ip_address   = module.pds_droplet.ip_address
 }
 
+module "dmarc" {
+  source = "./modules/dmarc"
+
+  policy           = "quarantine"
+  subdomain_policy = "reject"
+}
+
 module "resend_dns" {
   source = "./modules/dns-resend-aws"
 
@@ -55,8 +62,5 @@ module "resend_dns" {
   send_mx        = var.resend_mx_record
   send_txt       = var.resend_txt_record
   domainkey      = var.resend_domainkey
-  dmarc = {
-    policy           = "quarantine"
-    subdomain_policy = "reject"
-  }
+  dmarc          = module.dmarc.dmarc_record
 }
