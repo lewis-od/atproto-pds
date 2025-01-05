@@ -1,3 +1,7 @@
+data "aws_route53_zone" "zone" {
+  name = var.hosted_zone_name
+}
+
 module "pds_droplet" {
   source = "./modules/droplet"
 
@@ -35,17 +39,24 @@ module "pds_droplet" {
   ]
 }
 
-moved {
-  from = digitalocean_droplet.pds
-  to   = module.pds_droplet.digitalocean_droplet.this
+module "pds_dns" {
+  source = "./modules/dns-pds-aws"
+
+  hosted_zone_id   = data.aws_route53_zone.zone.id
+  hosted_zone_name = data.aws_route53_zone.zone.name
+  pds_ip_address   = module.pds_droplet.ip_address
 }
 
-moved {
-  from = digitalocean_reserved_ip.pds
-  to   = module.pds_droplet.digitalocean_reserved_ip.this
-}
+module "resend_dns" {
+  source = "./modules/dns-resend-aws"
 
-moved {
-  from = digitalocean_firewall.pds
-  to   = module.pds_droplet.digitalocean_firewall.this
+  root_domain    = module.pds_dns.pds_fqdn
+  hosted_zone_id = data.aws_route53_zone.zone.id
+  send_mx        = var.resend_mx_record
+  send_txt       = var.resend_txt_record
+  domainkey      = var.resend_domainkey
+  dmarc = {
+    policy           = "quarantine"
+    subdomain_policy = "reject"
+  }
 }
