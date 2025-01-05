@@ -20,38 +20,36 @@ moved {
   to   = module.pds_dns.aws_route53_record.pds_star
 }
 
-resource "aws_route53_record" "resend_mx" {
-  name    = "send.${module.pds_dns.pds_fqdn}"
-  zone_id = data.aws_route53_zone.zone.zone_id
+module "resend_dns" {
+  source = "./modules/dns-resend-aws"
 
-  type    = "MX"
-  ttl     = "300"
-  records = [var.resend_mx_record]
+  root_domain    = module.pds_dns.pds_fqdn
+  hosted_zone_id = data.aws_route53_zone.zone.id
+  send_mx        = var.resend_mx_record
+  send_txt       = var.resend_txt_record
+  domainkey      = var.resend_domainkey
+  dmarc = {
+    policy           = "quarantine"
+    subdomain_policy = "reject"
+  }
 }
 
-resource "aws_route53_record" "resend_txt" {
-  name    = "send.${module.pds_dns.pds_fqdn}"
-  zone_id = data.aws_route53_zone.zone.zone_id
-
-  type    = "TXT"
-  ttl     = "300"
-  records = [var.resend_txt_record]
+moved {
+  from = aws_route53_record.resend_mx
+  to   = module.resend_dns.aws_route53_record.mx
 }
 
-resource "aws_route53_record" "resend_domainkey" {
-  name    = "resend._domainkey.${module.pds_dns.pds_fqdn}"
-  zone_id = data.aws_route53_zone.zone.zone_id
-
-  type    = "TXT"
-  ttl     = "300"
-  records = [var.resend_domainkey]
+moved {
+  from = aws_route53_record.resend_txt
+  to   = module.resend_dns.aws_route53_record.txt
 }
 
-resource "aws_route53_record" "resend_dmarc" {
-  name    = "_dmarc.${data.aws_route53_zone.zone.name}"
-  zone_id = data.aws_route53_zone.zone.zone_id
+moved {
+  from = aws_route53_record.resend_domainkey
+  to   = module.resend_dns.aws_route53_record.domainkey
+}
 
-  type    = "TXT"
-  ttl     = "300"
-  records = ["v=DMARC1; p=none;"]
+moved {
+  from = aws_route53_record.resend_dmarc
+  to   = module.resend_dns.aws_route53_record.dmarc
 }
