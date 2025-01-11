@@ -11,6 +11,8 @@ terraform {
       version = "5.82.2"
     }
   }
+
+  backend "s3" {}
 }
 
 provider "digitalocean" {

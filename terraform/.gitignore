@@ -4,3 +4,6 @@
 *.tfstate.backup
 
 *.auto.tfvars
+
+backends/
+
