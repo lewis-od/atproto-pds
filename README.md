@@ -39,3 +39,8 @@ Copy the `scripts/.env.example` file to `scripts/.env` and fill in your domain n
 - `./scripts/connect.sh` will open an SSH session with your PDS instance
 - `./scripts/update.sh` will run `sudo pdsadmin update` on your PDS
 - `./scripts/pdsadmin.sh <args>` will run `sudo pdsadmin <args>` on your PDS
+
+## Migrating your account
+
+If you created an account on Bluesky and would like to migrate it to your self-hosted PDS, follow
+the instructions [here](https://whtwnd.com/bnewbold.net/3l5ii332pf32u)
