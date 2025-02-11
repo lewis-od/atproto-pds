@@ -28,7 +28,7 @@ Terraform for hosting an [AT Proto PDS] using:
 
 From the `./terraform` directory
 
-1. Create a `.tfvars.auto` file containing values for the variables specified in `terarform/variables.tfvars`
+1. Create a `.auto.tfvars` file containing values for the variables specified in `terraform/variables.tfvars`
 2. Run `terraform init` followed by `terraform apply`
 3. SSH onto the instance (see Scripts section below) then follow the instructions [here](https://github.com/bluesky-social/pds/tree/main?tab=readme-ov-file#installer-on-ubuntu-20042204-and-debian-1112)
 

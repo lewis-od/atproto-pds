@@ -3,8 +3,9 @@
 
 provider "registry.terraform.io/digitalocean/digitalocean" {
   version     = "2.46.1"
-  constraints = "2.46.1"
+  constraints = "~> 2.46, 2.46.1"
   hashes = [
+    "h1:R4hRmY/txPFZWzBhc8NRa40rymtrxhuFfb6TlGjNVPw=",
     "h1:RLRn2WL8Hwb08G1QHEkfo+6+dCZv2/LUiQblZmPy7yo=",
     "zh:3526081f8a54f40cc15deedc451e1fd6e816af1d64910e5db5c4feb344efb2aa",
     "zh:448140c8a9cbc3c0f98cafc77eeefb67216f8a508ba2d7519a95a1f35b985f14",
@@ -27,8 +28,9 @@ provider "registry.terraform.io/digitalocean/digitalocean" {
 
 provider "registry.terraform.io/hashicorp/aws" {
   version     = "5.82.2"
-  constraints = "5.82.2"
+  constraints = "~> 5.82, 5.82.2"
   hashes = [
+    "h1:RuPaHbllUB8a2TGTyc149wJfoh6zhIEjUvFYKR6iP2E=",
     "h1:ce6Dw2y4PpuqAPtnQ0dO270dRTmwEARqnfffrE1VYJ8=",
     "zh:0262fc96012fb7e173e1b7beadd46dfc25b1dc7eaef95b90e936fc454724f1c8",
     "zh:397413613d27f4f54d16efcbf4f0a43c059bd8d827fe34287522ae182a992f9b",

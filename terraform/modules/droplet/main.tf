@@ -18,9 +18,8 @@ resource "digitalocean_droplet" "this" {
   monitoring = true
 
   backup_policy {
-    plan    = "weekly"
-    weekday = var.backup_day
-    hour    = 0
+    plan = "daily"
+    hour = var.backup_time
   }
 }
 

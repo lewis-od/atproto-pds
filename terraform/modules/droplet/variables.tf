@@ -26,14 +26,14 @@ variable "ssh_key_ids" {
   default     = []
 }
 
-variable "backup_day" {
-  type        = string
-  description = "Day of the week to perform the weekly backup"
-  default     = "SUN"
+variable "backup_time" {
+  type        = number
+  description = "Hour of the day that the 4 hour backup windows starts."
+  default     = 0
 
   validation {
-    condition     = contains(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], var.backup_day)
-    error_message = "Must be a day of the week (e.g. MON)"
+    condition     = contains([0, 4, 8, 12, 16, 20], var.backup_time)
+    error_message = "Must be one of: 0, 4, 8, 12, 16, 20"
   }
 }
 
