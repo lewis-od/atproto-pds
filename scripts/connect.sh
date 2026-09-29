@@ -4,4 +4,4 @@ set -eu
 
 . "$(dirname $0)/.env"
 
-ssh "root@pds.$ROOT_DOMAIN"
+ssh "${PDS_USER:-root}@pds.$ROOT_DOMAIN"

@@ -2,6 +2,8 @@ data "aws_route53_zone" "zone" {
   name = var.hosted_zone_name
 }
 
+# TODO: remove this module, its variables and the digitalocean provider once the migration to OVH
+# described in docs/migration-do-to-ovh.md is complete and the Droplet has been decommissioned
 module "pds_droplet" {
   source = "./modules/droplet"
 
@@ -39,12 +41,45 @@ module "pds_droplet" {
   ]
 }
 
+module "pds_instance" {
+  source = "./modules/instance-ovh"
+
+  name           = "atproto-pds"
+  flavor_name    = var.ovh_flavor_name
+  ssh_public_key = var.ssh_public_key
+  firewall_rules_inbound = [
+    {
+      protocol         = "tcp",
+      port             = 22,
+      source_addresses = ["0.0.0.0/0"],
+    },
+    {
+      protocol         = "tcp",
+      port             = 443,
+      source_addresses = ["0.0.0.0/0"],
+    },
+    {
+      protocol         = "tcp",
+      port             = 80,
+      source_addresses = ["0.0.0.0/0"],
+    },
+  ]
+}
+
+module "pds_backup_storage" {
+  source = "./modules/backup-storage-ovh"
+
+  service_name = var.ovh_project_id
+  region       = var.ovh_storage_region
+  bucket_name  = var.backup_bucket_name
+}
+
 module "pds_dns" {
   source = "./modules/dns-pds-aws"
 
   hosted_zone_id   = data.aws_route53_zone.zone.id
   hosted_zone_name = data.aws_route53_zone.zone.name
-  pds_ip_address   = module.pds_droplet.ip_address
+  pds_ip_address   = var.cutover_dns_to_ovh ? module.pds_instance.ip_address : module.pds_droplet.ip_address
 }
 
 module "dmarc" {
