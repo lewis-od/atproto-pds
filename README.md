@@ -30,7 +30,7 @@ From the `./terraform` directory
 
 1. Create a `.auto.tfvars` file containing values for the variables specified in `terraform/variables.tfvars`
 2. Run `terraform init` followed by `terraform apply`
-3. SSH onto the instance (see Scripts section below) then follow the instructions [here](https://github.com/bluesky-social/pds/tree/main?tab=readme-ov-file#installer-on-ubuntu-20042204-and-debian-1112)
+3. SSH onto the instance (see Scripts section below) then follow the instructions [here](https://github.com/bluesky-social/pds/tree/main#installing-on-ubuntu-200422042404-and-debian-111213)
 
 ## Scripts
 
