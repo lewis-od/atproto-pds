@@ -32,6 +32,6 @@ variable "firewall_rules_inbound" {
     port             = number,
     source_addresses = list(string),
   }))
-  description = "Inbound firewall rules for the instance. Egress is unrestricted."
+  description = "Inbound rules, applied as an nftables ruleset on the instance via cloud-init. Everything not listed is dropped. Egress is not managed here."
   default     = []
 }

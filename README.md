@@ -19,8 +19,10 @@ Currently mid-migration from [DigitalOcean] to OVHcloud. See
 1. Ensure you have a Hosted Zone setup in Route 53 for the domain you wish to use
 2. Create the domain `pds.<your root domain>` in Resend
 3. Create an OVHcloud Public Cloud project and note its ID
-4. Create OVH API credentials at <https://api.ovh.com/createToken/> with unlimited rights on `/cloud/*`
-5. Create an OpenStack user under **Public Cloud > Users & Roles** and download its `openrc` file
+4. Create OVH API credentials at <https://api.ovh.com/createToken/>, with the rights listed in
+   [docs/migration-do-to-ovh.md](docs/migration-do-to-ovh.md#before-you-start)
+5. Create an OpenStack user under **Public Cloud > Users & Roles** with the `compute_operator` and
+   `network_security_operator` roles, then generate a password for it from its **...** menu
 
 ## Deploying
 

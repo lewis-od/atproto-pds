@@ -1,0 +1,32 @@
+#!/usr/sbin/nft -f
+
+# Only this table is reset. A `flush ruleset` here would also wipe the chains Docker installs for
+# the PDS containers, whenever this file is reloaded.
+add table inet filter
+delete table inet filter
+
+table inet filter {
+  chain input {
+    type filter hook input priority filter; policy drop;
+
+    ct state established,related accept
+    ct state invalid drop
+    iif lo accept
+
+    # Dropping ICMP breaks path MTU discovery, and dropping ICMPv6 breaks IPv6 neighbour discovery
+    ip protocol icmp accept
+    ip6 nexthdr icmpv6 accept
+
+%{ for rule in rules ~}
+    ${rule.family} saddr ${rule.source} ${rule.protocol} dport ${rule.port} accept
+%{ endfor ~}
+  }
+
+  chain forward {
+    type filter hook forward priority filter; policy accept;
+  }
+
+  chain output {
+    type filter hook output priority filter; policy accept;
+  }
+}

@@ -22,7 +22,7 @@ variable "ovh_project_id" {
 
 variable "ovh_application_key" {
   type        = string
-  description = "Application key for the OVH API, created at https://api.ovh.com/createToken/"
+  description = "Application key for the OVH API. See docs/migration-do-to-ovh.md for the rights the token needs"
 }
 
 variable "ovh_application_secret" {
@@ -39,12 +39,12 @@ variable "ovh_consumer_key" {
 
 variable "openstack_user_name" {
   type        = string
-  description = "Username of the OpenStack user, from the openrc file downloaded when creating the user"
+  description = "Username of the OpenStack user, shown in the OVH control panel under Public Cloud > Users & Roles"
 }
 
 variable "openstack_password" {
   type        = string
-  description = "Password of the OpenStack user"
+  description = "Password of the OpenStack user, generated from its ... menu in the OVH control panel and shown only once"
   sensitive   = true
 }
 

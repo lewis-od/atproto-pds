@@ -22,45 +22,33 @@ resource "openstack_compute_keypair_v2" "this" {
 }
 
 locals {
-  # OpenStack rules take a single CIDR each, so expand the per-port source lists
-  inbound_rules = merge([
-    for rule in var.firewall_rules_inbound : {
-      for source in rule.source_addresses :
-      "${rule.protocol}-${rule.port}-${source}" => {
+  # OpenStack rules took a single CIDR each; nftables does too, so keep the per-port expansion
+  inbound_rules = flatten([
+    for rule in var.firewall_rules_inbound : [
+      for source in rule.source_addresses : {
         protocol = rule.protocol
         port     = rule.port
         source   = source
+        family   = strcontains(source, ":") ? "ip6" : "ip"
       }
-    }
-  ]...)
-}
+    ]
+  ])
 
-resource "openstack_networking_secgroup_v2" "this" {
-  name        = var.name
-  description = "Ingress rules for ${var.name}"
-
-  # The implicit allow-all egress rules match the outbound rules we had on DigitalOcean
-  delete_default_rules = false
-}
-
-resource "openstack_networking_secgroup_rule_v2" "inbound" {
-  for_each = local.inbound_rules
-
-  security_group_id = openstack_networking_secgroup_v2.this.id
-  direction         = "ingress"
-  ethertype         = strcontains(each.value.source, ":") ? "IPv6" : "IPv4"
-  protocol          = each.value.protocol
-  port_range_min    = each.value.port
-  port_range_max    = each.value.port
-  remote_ip_prefix  = each.value.source
+  user_data = templatefile("${path.module}/templates/cloud-init.yaml.tftpl", {
+    nftables_conf = templatefile("${path.module}/templates/nftables.conf.tftpl", {
+      rules = local.inbound_rules
+    })
+  })
 }
 
 resource "openstack_compute_instance_v2" "this" {
-  name            = var.name
-  image_id        = data.openstack_images_image_v2.this.id
-  flavor_id       = data.openstack_compute_flavor_v2.this.id
-  key_pair        = openstack_compute_keypair_v2.this.name
-  security_groups = [openstack_networking_secgroup_v2.this.name]
+  name      = var.name
+  image_id  = data.openstack_images_image_v2.this.id
+  flavor_id = data.openstack_compute_flavor_v2.this.id
+  key_pair  = openstack_compute_keypair_v2.this.name
+
+  # The OVH project has no security group quota, so filtering happens on the instance instead
+  user_data = local.user_data
 
   network {
     name = var.public_network_name

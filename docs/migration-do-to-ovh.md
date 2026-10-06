@@ -32,11 +32,47 @@ flowchart LR
 ## Before you start
 
 1. Create an OVH Public Cloud project, and note its ID. This is also the OpenStack tenant ID.
-2. Create OVH API credentials at <https://api.ovh.com/createToken/> with unlimited rights on `/cloud/*`.
+2. Create OVH API credentials at <https://api.ovh.com/createToken/>. The `ovh` provider only
+   manages the backup bucket and the backup user, so grant only the rights below, substituting your
+   project ID and, if you changed `ovh_storage_region`, your storage region:
+
+   ```text
+   GET     /auth/details
+   GET     /cloud/project/<project-id>
+   GET     /cloud/project/<project-id>/role
+   GET     /cloud/project/<project-id>/user
+   POST    /cloud/project/<project-id>/user
+   GET     /cloud/project/<project-id>/user/*
+   POST    /cloud/project/<project-id>/user/*
+   PUT     /cloud/project/<project-id>/user/*
+   DELETE  /cloud/project/<project-id>/user/*
+   GET     /cloud/project/<project-id>/region/UK/storage
+   POST    /cloud/project/<project-id>/region/UK/storage
+   GET     /cloud/project/<project-id>/region/UK/storage/*
+   PUT     /cloud/project/<project-id>/region/UK/storage/*
+   DELETE  /cloud/project/<project-id>/region/UK/storage/*
+   ```
+
+   `GET /auth/details` is not optional. The provider validates its credentials with that call before
+   it does anything else, so without it every apply fails at provider configuration.
+
    This gives you an application key, application secret and consumer key.
 3. In the OVH control panel under **Public Cloud > Users & Roles**, create a user with the
-   `administrator` role and download its `openrc` file. This gives you the OpenStack username and
-   password.
+   `compute_operator` and `network_security_operator` roles. Terraform uses this user only for the
+   instance, its keypair and its security group, so it does not need `administrator`.
+
+   The user has no password when it is created. Get one from the user's **...** menu, under
+   **Generate a password**. It is shown once and cannot be retrieved later, so put it straight into
+   `.auto.tfvars`; if you lose it, generate a new one, which invalidates the old. The username is
+   listed next to the user in the same table.
+
+   OVH does not publish a per-role permission matrix, so if an apply returns a 403, add the matching
+   role and run it again. Changing a user's roles does not invalidate its password:
+
+   | 403 on | Add |
+   | ------------------------------------------- | --------------------------- |
+   | `openstack_images_image_v2` | `image_operator` |
+   | `openstack_networking_secgroup_v2`, or attaching the instance to `Ext-Net` | `network_operator` |
 4. Add the new variables to your `.auto.tfvars`:
 
    ```hcl
@@ -109,6 +145,16 @@ ssh root@pds.<your root domain> 'systemctl stop pds'
 # on the OVH instance
 sudo rsync -aHAX --delete --rsync-path='sudo rsync' \
   root@pds.<your root domain>:/pds/ /pds/
+```
+
+The copy brings the Droplet's `pds.env` with it, including an SMTP URL on a port OVH blocks, so
+repoint it at one of Resend's alternative ports before the PDS starts. This has to happen after the
+final rsync, or the copy overwrites it:
+
+```shell
+# on the OVH instance, 465 -> 2465, or 587 -> 2587 if yours uses STARTTLS
+sudo sed -i 's|@smtp\.resend\.com:465|@smtp.resend.com:2465|' /pds/pds.env
+grep -i smtp /pds/pds.env
 ```
 
 Point DNS at the new instance by setting `cutover_dns_to_ovh = true` in your `.auto.tfvars`, then:
@@ -237,9 +283,26 @@ opposite direction, onto a stopped PDS.
 
 - **`d2-2` is OVH's Discovery range.** It is best effort with no SLA and cannot be resized into
   another family. `b3-8` is the general purpose equivalent if that becomes a problem.
-- **An OVH instance with no security group of its own falls back to a permissive `default` group**
-  that allows everything in both directions. The `instance-ovh` module is what closes the box, so do
-  not detach it.
+- **Filtering is done by nftables on the instance, not by a security group.** The UK1 security
+  group quota on this project is 0, so `instance-ovh` renders `firewall_rules_inbound` into
+  `/etc/nftables.conf` through cloud-init and the instance sits on OVH's `default` group. The
+  ruleset resets only its own `inet filter` table rather than running `flush ruleset`, which would
+  also wipe the chains Docker installs for the PDS containers.
+- **A host firewall does not cover container published ports.** Docker publishes 80 and 443 by
+  DNAT, so that traffic traverses `forward`, not `input`, and the nftables `input` policy never
+  sees it. Those two ports are meant to be open to the internet anyway, but it does mean the host
+  firewall protects host services such as sshd and nothing else. A security group would cover both,
+  which is the remaining reason to take the quota if OVH grants it.
+- **OVH's `default` security group is permissive inbound but not outbound.** Its two ingress rules
+  set no protocol, port or remote, so every port is reachable from the internet, IPv4 and IPv6. Its
+  egress rules cover `1-24`, `26-464`, `466-586` and `588-65535`, which silently drops outbound
+  SMTP on 25, 465 and 587 — connections to those ports hang rather than fail. Resend also listens
+  on 2465 and 2587, which the ranges above allow, so the PDS reaches it on those. A security group
+  you create yourself gets allow-all egress and does not have this problem.
+- **The backup user is scoped by policy, not by role.** OVH has no object storage role narrower
+  than `objectstore_operator`, which grants access to every bucket in the project. The
+  `ovh_cloud_project_user_s3_policy` on that user is what reduces it to this one bucket, so the
+  policy is load bearing — removing it widens the user's access rather than narrowing it.
 - **`pds.env` contains the PLC rotation key.** Anywhere it is copied to needs to be treated as
   secret. Losing the key means you can never update your DID document; leaking it means someone else
   can. The backup bucket is encrypted at rest and reachable only by its own scoped user.

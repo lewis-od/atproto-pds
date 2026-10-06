@@ -1,0 +1,11 @@
+#cloud-config
+package_update: true
+packages:
+  - nftables
+write_files:
+  - path: /etc/nftables.conf
+    permissions: '0755'
+    content: |
+      ${indent(6, nftables_conf)}
+runcmd:
+  - [systemctl, enable, --now, nftables]
